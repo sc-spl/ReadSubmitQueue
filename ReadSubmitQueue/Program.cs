@@ -24,7 +24,8 @@ namespace ReadSubmitQueue
             {
                 if (entry is ContactSubmitQueueEntry queueEntry)
                 {
-                    Console.WriteLine($"ContactSubmitQueueEntry found, contact id: {GetContactId(queueEntry)}");
+                    var contact = GetContact(queueEntry);
+                    Console.WriteLine($"ContactSubmitQueueEntry found, contact id: {contact.ContactId}, IsNew: {contact.IsNew}, NeedToBeRecreated: {GetNeedToBeRecreated(contact)}");
                 }
 
                 if (entry is SessionSubmitQueueEntry)
@@ -37,13 +38,23 @@ namespace ReadSubmitQueue
             Console.ReadKey();
         }
 
-        private static Guid GetContactId(ContactSubmitQueueEntry entry)
+        private static Contact GetContact(ContactSubmitQueueEntry entry)
         {
             var contact =
                 entry.GetType()
                     .GetField("_contact", BindingFlags.GetField | BindingFlags.Instance | BindingFlags.NonPublic)
                     .GetValue(entry) as Contact;
-            return contact.ContactId;
+            return contact;
+        }
+
+        private static bool GetNeedToBeRecreated(Contact contactContext)
+        {
+            var contact = ((ContactContext)contactContext).Contact;
+            if (!contact.Extensions.Groups.Contains("NeedToBeRecreated") || !contact.Extensions.Groups["NeedToBeRecreated"].Entries.Contains("NeedToBeRecreated") || !bool.TryParse(contact.Extensions.Groups["NeedToBeRecreated"].Entries["NeedToBeRecreated"].Value, out bool result))
+            {
+                return false;
+            }
+            return result;
         }
     }
 }
