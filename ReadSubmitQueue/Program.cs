@@ -20,21 +20,26 @@ namespace ReadSubmitQueue
 
             SubmitQueueEntry entry;
 
+            int contactEntriesCount = 0;
+            int sessionEntriesCount = 0;
+
             while ((entry = submitQueue.Dequeue()) != null)
             {
                 if (entry is ContactSubmitQueueEntry queueEntry)
                 {
+                    contactEntriesCount++;
                     var contact = GetContact(queueEntry);
                     Console.WriteLine($"ContactSubmitQueueEntry found, contact id: {contact.ContactId}, IsNew: {contact.IsNew}, NeedToBeRecreated: {GetNeedToBeRecreated(contact)}");
                 }
 
                 if (entry is SessionSubmitQueueEntry)
                 {
+                    sessionEntriesCount++;
                     Console.WriteLine("SessionSubmitQueueEntry found");
                 }
             }
 
-            Console.WriteLine("Data reading is finished");
+            Console.WriteLine($"Data reading is finished. Contact entries found: {contactEntriesCount}, Session entries found: {sessionEntriesCount}");
             Console.ReadKey();
         }
 
